@@ -2,6 +2,8 @@ require("dotenv").config();
 const { getJson } = require("serpapi");
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+const {executablePath} = require("puppeteer");
+
 puppeteer.use(StealthPlugin());
 
 const { OpenAI } = require("openai");
@@ -31,7 +33,16 @@ async function searchAndScrape(topic) {
   console.log(`Found link via SerpApi: ${firstLink}. Now scraping page...`);
 
   // Step 2: Use Puppeteer with stealth to scrape the target page
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: executablePath(),
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--single-process",
+    ],
+  });
   const page = await browser.newPage();
   await page.goto(firstLink, { waitUntil: "networkidle2" });
 
